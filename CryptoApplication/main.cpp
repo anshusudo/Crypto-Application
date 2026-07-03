@@ -6,6 +6,7 @@
 #pragma comment(lib, "C:\\Program Files\\OpenSSL-Win64\\lib\\VC\\x64\\MD\\libssl.lib")
 
 
+
 int main() {
     // Dynamic runtime mapping configuration allocation
     OpenSSL_add_all_algorithms();
@@ -19,9 +20,7 @@ int main() {
     std::vector<unsigned char> aesIv = { 'I','n','i','t','V','e','c','t','o','r','1','2','3','4','5','6' };
 
     while (true) {
-        std::cout << "\n============================================\n";
         std::cout << "  EXPERIMENTAL CRYPTOGRAPHY APPLICATION CORE \n";
-        std::cout << "============================================\n";
         std::cout << "1. Generate RSA Key Pair (Asymmetric)\n";
         std::cout << "2. RSA Encrypt File\n";
         std::cout << "3. RSA Decrypt File\n";
