@@ -11,6 +11,7 @@
 #include <openssl/rsa.h>
 #include <openssl/err.h>
 #include <openssl/sha.h>
+using namespace std;
 
 // Handle runtime failures safely
 inline void handleErrors() {
@@ -19,19 +20,19 @@ inline void handleErrors() {
 }
 
 // Optimized Binary I/O processing systems
-inline std::vector<unsigned char> readFile(const std::string& filename) {
-    std::ifstream file(filename, std::ios::binary);
+inline vector<unsigned char> readFile(const string& filename) {
+    ifstream file(filename, ios::binary);
     if (!file.is_open()) {
-        std::cerr << "[-] Error opening file for reading: " << filename << "\n";
+        cerr << "[-] Error opening file for reading: " << filename << "\n";
         return {};
     }
-    return std::vector<unsigned char>((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    return vector<unsigned char>((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
 }
 
-inline bool writeFile(const std::string& filename, const std::vector<unsigned char>& data) {
-    std::ofstream file(filename, std::ios::binary);
+inline bool writeFile(const string& filename, const vector<unsigned char>& data) {
+    ofstream file(filename, ios::binary);
     if (!file.is_open()) {
-        std::cerr << "[-] Error opening file for writing: " << filename << "\n";
+        cerr << "[-] Error opening file for writing: " << filename << "\n";
         return false;
     }
     file.write(reinterpret_cast<const char*>(data.data()), data.size());
@@ -39,34 +40,33 @@ inline bool writeFile(const std::string& filename, const std::vector<unsigned ch
 }
 
 // Compute File Integrity Cryptographic Checksum
-inline std::string computeSHA256(const std::vector<unsigned char>& data) {
+inline string computeSHA256(const vector<unsigned char>& data) {
     unsigned char hash[EVP_MAX_MD_SIZE];
     unsigned int hash_len = 0;
 
-    std::unique_ptr<EVP_MD_CTX, decltype(&EVP_MD_CTX_free)> ctx(EVP_MD_CTX_new(), EVP_MD_CTX_free);
+    unique_ptr<EVP_MD_CTX, decltype(&EVP_MD_CTX_free)> ctx(EVP_MD_CTX_new(), EVP_MD_CTX_free);
     if (!ctx) return "";
 
     if (1 != EVP_DigestInit_ex(ctx.get(), EVP_sha256(), nullptr)) return "";
     if (1 != EVP_DigestUpdate(ctx.get(), data.data(), data.size())) return "";
     if (1 != EVP_DigestFinal_ex(ctx.get(), hash, &hash_len)) return "";
 
-    char buf[EVP_MAX_MD_SIZE * 2 + 1] = { 0 };
+    char buf[65];
     for (unsigned int i = 0; i < hash_len; i++) {
         sprintf_s(buf + (i * 2), sizeof(buf) - (i * 2), "%02x", hash[i]);
     }
-    return std::string(buf);
+    return string(buf);
 }
 
 
-
 // AES-256-CBC Symmetric Processing System
-inline std::vector<unsigned char> aesEncrypt(const std::vector<unsigned char>& plaintext, const std::vector<unsigned char>& key, const std::vector<unsigned char>& iv) {
-    std::unique_ptr<EVP_CIPHER_CTX, decltype(&EVP_CIPHER_CTX_free)> ctx(EVP_CIPHER_CTX_new(), EVP_CIPHER_CTX_free);
+inline vector<unsigned char> aesEncrypt(const vector<unsigned char>& plaintext, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
+    unique_ptr<EVP_CIPHER_CTX, decltype(&EVP_CIPHER_CTX_free)> ctx(EVP_CIPHER_CTX_new(), EVP_CIPHER_CTX_free);
     if (!ctx) handleErrors();
 
     if (1 != EVP_EncryptInit_ex(ctx.get(), EVP_aes_256_cbc(), nullptr, key.data(), iv.data())) handleErrors();
 
-    std::vector<unsigned char> ciphertext(plaintext.size() + EVP_MAX_BLOCK_LENGTH);
+    vector<unsigned char> ciphertext(plaintext.size() + EVP_MAX_BLOCK_LENGTH);
     int len = 0, ciphertext_len = 0;
 
     if (1 != EVP_EncryptUpdate(ctx.get(), ciphertext.data(), &len, plaintext.data(), plaintext.size())) handleErrors();
@@ -79,13 +79,13 @@ inline std::vector<unsigned char> aesEncrypt(const std::vector<unsigned char>& p
     return ciphertext;
 }
 
-inline std::vector<unsigned char> aesDecrypt(const std::vector<unsigned char>& ciphertext, const std::vector<unsigned char>& key, const std::vector<unsigned char>& iv) {
-    std::unique_ptr<EVP_CIPHER_CTX, decltype(&EVP_CIPHER_CTX_free)> ctx(EVP_CIPHER_CTX_new(), EVP_CIPHER_CTX_free);
+inline vector<unsigned char> aesDecrypt(const vector<unsigned char>& ciphertext, const vector<unsigned char>& key, const vector<unsigned char>& iv) {
+    unique_ptr<EVP_CIPHER_CTX, decltype(&EVP_CIPHER_CTX_free)> ctx(EVP_CIPHER_CTX_new(), EVP_CIPHER_CTX_free);
     if (!ctx) handleErrors();
 
     if (1 != EVP_DecryptInit_ex(ctx.get(), EVP_aes_256_cbc(), nullptr, key.data(), iv.data())) handleErrors();
 
-    std::vector<unsigned char> plaintext(ciphertext.size());
+    vector<unsigned char> plaintext(ciphertext.size());
     int len = 0, plaintext_len = 0;
 
     if (1 != EVP_DecryptUpdate(ctx.get(), plaintext.data(), &len, ciphertext.data(), ciphertext.size())) handleErrors();
@@ -99,8 +99,8 @@ inline std::vector<unsigned char> aesDecrypt(const std::vector<unsigned char>& c
 }
 
 // RSA Asymmetric Infrastructure Systems
-inline bool generateRSAKeys(const std::string& publicKeyFile, const std::string& privateKeyFile) {
-    std::unique_ptr<EVP_PKEY_CTX, decltype(&EVP_PKEY_CTX_free)> ctx(EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr), EVP_PKEY_CTX_free);
+inline bool generateRSAKeys(const string& publicKeyFile, const string& privateKeyFile) {
+    unique_ptr<EVP_PKEY_CTX, decltype(&EVP_PKEY_CTX_free)> ctx(EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, nullptr), EVP_PKEY_CTX_free);
     if (!ctx || EVP_PKEY_keygen_init(ctx.get()) <= 0) return false;
     if (EVP_PKEY_CTX_set_rsa_keygen_bits(ctx.get(), 2048) <= 0) return false;
 
@@ -127,7 +127,7 @@ inline bool generateRSAKeys(const std::string& publicKeyFile, const std::string&
     return true;
 }
 
-inline std::vector<unsigned char> rsaEncrypt(const std::vector<unsigned char>& plaintext, const std::string& publicKeyFile) {
+inline vector<unsigned char> rsaEncrypt(const vector<unsigned char>& plaintext, const string& publicKeyFile) {
     FILE* pubFile = nullptr;
     fopen_s(&pubFile, publicKeyFile.c_str(), "rb");
     if (!pubFile) return {};
@@ -135,20 +135,20 @@ inline std::vector<unsigned char> rsaEncrypt(const std::vector<unsigned char>& p
     fclose(pubFile);
     if (!pkey) return {};
 
-    std::unique_ptr<EVP_PKEY_CTX, decltype(&EVP_PKEY_CTX_free)> ctx(EVP_PKEY_CTX_new(pkey, nullptr), EVP_PKEY_CTX_free);
+    unique_ptr<EVP_PKEY_CTX, decltype(&EVP_PKEY_CTX_free)> ctx(EVP_PKEY_CTX_new(pkey, nullptr), EVP_PKEY_CTX_free);
     EVP_PKEY_free(pkey);
     if (!ctx || EVP_PKEY_encrypt_init(ctx.get()) <= 0) return {};
     if (EVP_PKEY_CTX_set_rsa_padding(ctx.get(), RSA_PKCS1_OAEP_PADDING) <= 0) return {};
 
     size_t outLen;
     if (EVP_PKEY_encrypt(ctx.get(), nullptr, &outLen, plaintext.data(), plaintext.size()) <= 0) return {};
-    std::vector<unsigned char> ciphertext(outLen);
+    vector<unsigned char> ciphertext(outLen);
     if (EVP_PKEY_encrypt(ctx.get(), ciphertext.data(), &outLen, plaintext.data(), plaintext.size()) <= 0) return {};
 
     return ciphertext;
 }
 
-inline std::vector<unsigned char> rsaDecrypt(const std::vector<unsigned char>& ciphertext, const std::string& privateKeyFile) {
+inline vector<unsigned char> rsaDecrypt(const vector<unsigned char>& ciphertext, const string& privateKeyFile) {
     FILE* privFile = nullptr;
     fopen_s(&privFile, privateKeyFile.c_str(), "rb");
     if (!privFile) return {};
@@ -156,14 +156,14 @@ inline std::vector<unsigned char> rsaDecrypt(const std::vector<unsigned char>& c
     fclose(privFile);
     if (!pkey) return {};
 
-    std::unique_ptr<EVP_PKEY_CTX, decltype(&EVP_PKEY_CTX_free)> ctx(EVP_PKEY_CTX_new(pkey, nullptr), EVP_PKEY_CTX_free);
+    unique_ptr<EVP_PKEY_CTX, decltype(&EVP_PKEY_CTX_free)> ctx(EVP_PKEY_CTX_new(pkey, nullptr), EVP_PKEY_CTX_free);
     EVP_PKEY_free(pkey);
     if (!ctx || EVP_PKEY_decrypt_init(ctx.get()) <= 0) return {};
     if (EVP_PKEY_CTX_set_rsa_padding(ctx.get(), RSA_PKCS1_OAEP_PADDING) <= 0) return {};
 
     size_t outLen;
     if (EVP_PKEY_decrypt(ctx.get(), nullptr, &outLen, ciphertext.data(), ciphertext.size()) <= 0) return {};
-    std::vector<unsigned char> plaintext(outLen);
+    vector<unsigned char> plaintext(outLen);
     if (EVP_PKEY_decrypt(ctx.get(), plaintext.data(), &outLen, ciphertext.data(), ciphertext.size()) <= 0) return {};
 
     plaintext.resize(outLen);

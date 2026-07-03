@@ -1,6 +1,7 @@
 #define _CRT_SECURE_NO_WARNINGS
 #include "crypto_helpers.h"
 #include <openssl/applink.c>
+using namespace std;
 #pragma warning(disable: 4267)
 #pragma comment(lib, "C:\\Program Files\\OpenSSL-Win64\\lib\\VC\\x64\\MD\\libcrypto.lib")
 #pragma comment(lib, "C:\\Program Files\\OpenSSL-Win64\\lib\\VC\\x64\\MD\\libssl.lib")
@@ -12,28 +13,26 @@ int main() {
     ERR_load_crypto_strings();
 
     int choice;
-    std::string inFile, outFile, pubKeyFile, privKeyFile;
+    string inFile, outFile, pubKeyFile, privKeyFile;
 
     // Balanced 256-bit Key & 128-bit Implementation Vector Buffer for processing
-    std::vector<unsigned char> aesKey = { 'M','y','S','e','c','r','e','t','K','e','y','1','2','3','4','5','M','y','S','e','c','r','e','t','K','e','y','1','2','3','4','5' };
-    std::vector<unsigned char> aesIv = { 'I','n','i','t','V','e','c','t','o','r','1','2','3','4','5','6' };
+    vector<unsigned char> aesKey = { 'M','y','S','e','c','r','e','t','K','e','y','1','2','3','4','5','M','y','S','e','c','r','e','t','K','e','y','1','2','3','4','5' };
+    vector<unsigned char> aesIv = { 'I','n','i','t','V','e','c','t','o','r','1','2','3','4','5','6' };
 
     while (true) {
-        std::cout << "\n============================================\n";
-        std::cout << "  EXPERIMENTAL CRYPTOGRAPHY APPLICATION CORE \n";
-        std::cout << "============================================\n";
-        std::cout << "1. Generate RSA Key Pair (Asymmetric)\n";
-        std::cout << "2. RSA Encrypt File\n";
-        std::cout << "3. RSA Decrypt File\n";
-        std::cout << "4. AES-256-CBC Encrypt File (Symmetric)\n";
-        std::cout << "5. AES-256-CBC Decrypt File (Symmetric)\n";
-        std::cout << "6. Compute File Checksum Hash (SHA-256)\n";
-        std::cout << "7. Exit Application\n";
-        std::cout << "Select Operation [1-7]: ";
+        cout << "  EXPERIMENTAL CRYPTOGRAPHY APPLICATION CORE \n";
+        cout << "1. Generate RSA Key Pair (Asymmetric)\n";
+        cout << "2. RSA Encrypt File\n";
+        cout << "3. RSA Decrypt File\n";
+        cout << "4. AES-256-CBC Encrypt File (Symmetric)\n";
+        cout << "5. AES-256-CBC Decrypt File (Symmetric)\n";
+        cout << "6. Compute File Checksum Hash (SHA-256)\n";
+        cout << "7. Exit Application\n";
+        cout << "Select Operation [1-7]: ";
 
-        if (!(std::cin >> choice)) {
-            std::cin.clear();
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        if (!(cin >> choice)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
             continue;
         }
 
@@ -41,39 +40,39 @@ int main() {
 
         switch (choice) {
         case 1:
-            std::cout << "Enter Public Key output filename (e.g. public.pem): "; std::cin >> pubKeyFile;
-            std::cout << "Enter Private Key output filename (e.g. private.pem): "; std::cin >> privKeyFile;
-            if (generateRSAKeys(pubKeyFile, privKeyFile)) std::cout << "[+] Key pair generated successfully!\n";
-            else std::cout << "[-] Key generation failed.\n";
+            cout << "Enter Public Key output filename (e.g. public.pem): "; cin >> pubKeyFile;
+            cout << "Enter Private Key output filename (e.g. private.pem): "; cin >> privKeyFile;
+            if (generateRSAKeys(pubKeyFile, privKeyFile)) cout << "[+] Key pair generated successfully!\n";
+            else cout << "[-] Key generation failed.\n";
             break;
         case 2:
-            std::cout << "Source file to encrypt: "; std::cin >> inFile;
-            std::cout << "Destination encrypted file: "; std::cin >> outFile;
-            std::cout << "Recipient Public key file path: "; std::cin >> pubKeyFile;
-            if (writeFile(outFile, rsaEncrypt(readFile(inFile), pubKeyFile))) std::cout << "[+] File encrypted using RSA.\n";
+            cout << "Source file to encrypt: "; cin >> inFile;
+            cout << "Destination encrypted file: "; cin >> outFile;
+            cout << "Recipient Public key file path: "; cin >> pubKeyFile;
+            if (writeFile(outFile, rsaEncrypt(readFile(inFile), pubKeyFile))) cout << "[+] File encrypted using RSA.\n";
             break;
         case 3:
-            std::cout << "Encrypted file path: "; std::cin >> inFile;
-            std::cout << "Destination decrypted file: "; std::cin >> outFile;
-            std::cout << "Your Private key file path: "; std::cin >> privKeyFile;
-            if (writeFile(outFile, rsaDecrypt(readFile(inFile), privKeyFile))) std::cout << "[+] File decrypted using RSA.\n";
+            cout << "Encrypted file path: "; cin >> inFile;
+            cout << "Destination decrypted file: "; cin >> outFile;
+            cout << "Your Private key file path: "; cin >> privKeyFile;
+            if (writeFile(outFile, rsaDecrypt(readFile(inFile), privKeyFile))) cout << "[+] File decrypted using RSA.\n";
             break;
         case 4:
-            std::cout << "Source file to encrypt: "; std::cin >> inFile;
-            std::cout << "Destination encrypted file: "; std::cin >> outFile;
-            if (writeFile(outFile, aesEncrypt(readFile(inFile), aesKey, aesIv))) std::cout << "[+] File encrypted using AES-256.\n";
+            cout << "Source file to encrypt: "; cin >> inFile;
+            cout << "Destination encrypted file: "; cin >> outFile;
+            if (writeFile(outFile, aesEncrypt(readFile(inFile), aesKey, aesIv))) cout << "[+] File encrypted using AES-256.\n";
             break;
         case 5:
-            std::cout << "Encrypted file path: "; std::cin >> inFile;
-            std::cout << "Destination decrypted file: "; std::cin >> outFile;
-            if (writeFile(outFile, aesDecrypt(readFile(inFile), aesKey, aesIv))) std::cout << "[+] File decrypted using AES-256.\n";
+            cout << "Encrypted file path: "; cin >> inFile;
+            cout << "Destination decrypted file: "; cin >> outFile;
+            if (writeFile(outFile, aesDecrypt(readFile(inFile), aesKey, aesIv))) cout << "[+] File decrypted using AES-256.\n";
             break;
         case 6:
-            std::cout << "Enter target file path: "; std::cin >> inFile;
-            std::cout << "[+] SHA-256 Hash Digest: " << computeSHA256(readFile(inFile)) << "\n";
+            cout << "Enter target file path: "; cin >> inFile;
+            cout << "[+] SHA-256 Hash Digest: " << computeSHA256(readFile(inFile)) << "\n";
             break;
         default:
-            std::cout << "Invalid selection.\n";
+            cout << "Invalid selection.\n";
         }
     }
 
